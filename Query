@@ -1,0 +1,145 @@
+ // Location wise total restaurant //
+
+select count(Restaurant_name) as restaurant, location 
+from swiggy_restaurants
+group by location;
+
+ // Restaurant wise total dishes in different locations //
+
+select restaurant_Name, location, Count(Dish_Name) as Item
+from swiggy_restaurants
+group by Restaurant_Name, location, restaurant_name
+order by Restaurant_Name;
+
+// Category wise top rating restaurant //
+
+select Category, restaurant_name,Rating
+from swiggy_restaurants
+order by Rating desc
+limit 10;
+
+// Dishes with more than 4 star rating //
+ 
+select Dish_Name, Rating, Rating_Count
+from swiggy_restaurants
+where Rating > 4
+order by Rating_Count Desc;
+
+// Kengeri location restaurant wise total order //
+
+select restaurant_name, count(dish_name) as cousine
+from swiggy_restaurants
+where location ="Kengeri"
+group by Restaurant_Name
+order by Restaurant_Name;
+
+// Top 10 restaurants with 4 star rating dishes //
+
+select restaurant_name, location, dish_name
+from swiggy_restaurants
+where rating < 4
+limit 10;
+
+// Location wise top 5 restaurants //
+
+select location, restaurant_name, Rating from
+(select location, restaurant_name, Rating,
+row_number() over (partition by location
+ order by Rating desc) as ranks from swiggy_restaurants) as top
+ where ranks <= 5
+
+// Restaurants wise top 5 dishes //
+
+select restaurant_name, dish_name, rating from 
+(select Restaurant_Name, dish_name, rating, 
+row_number() over (partition by dish_name
+order by rating desc) as ranks from swiggy_restaurants) as top
+where ranks <= 5;
+
+// Most oder with good reviews //
+
+select restaurant_name, rating, count(restaurant_name) as most_orders from (select restaurant_name, rating,
+row_number() over (partition by restaurant_name
+order by rating desc) as top from swiggy_restaurants) per
+where top <= 5
+group by restaurant_name, rating
+
+// Most order received restaurants location wise //
+
+select count(dish_name) as most_orders, location, restaurant_name
+from swiggy_restaurants
+group by location, restaurant_name
+order by most_orders  desc
+
+// Restaurant rating //
+
+select restaurant_name, round(avg(rating)) as ratings
+from swiggy_restaurants
+where rating != 0
+group by restaurant_name
+order by ratings desc
+
+// Top ranked restaurants location wise //
+
+select restaurant_name, location, rating
+from(select restaurant_name, location, rating,
+row_number() over (partition by location
+order by location) as sr from swiggy_restaurants
+where rating !=0) as ranked
+where sr =1
+
+// Top restaurant receive most orders //
+
+select restaurant_name, price, count(Restaurant_Name) as freq_orders
+from swiggy_restaurants
+where rating != 0
+group by restaurant_name, price
+order by freq_orders
+
+// Preferable restaurant to order //
+
+select restaurant_name, rating, location 
+from (select restaurant_name, rating, location,
+row_number() over(partition by location
+order by rating) as ranks from swiggy_restaurants
+where rating !=0) as top
+where ranks =1
+order by rating desc
+
+ //  Most loved dish_names //
+
+select dish_name, rating, location 
+from (select dish_name, rating, location, 
+rank() over (partition by location
+order by rating desc) as ranks from swiggy_restaurants
+WHERE rating >= 4.5
+AND rating <= 5) as top
+where ranks = 1
+order by rating desc
+
+// average rating restaurant more rating restaurants location wise //
+
+select restaurant_name, rating, location
+from swiggy_restaurants
+where rating > (select avg(rating) as ratings from swiggy_restaurants)
+order by rating desc
+
+// top five restaurant using WITH AS function //
+
+WITH top_five_restaurant as (
+select distinct restaurant_name, rating
+from swiggy_restaurants
+where rating != 0
+order by rating desc
+limit 5 )
+select * from to_five_restaurants
+
+
+Tools & Technologies
+•	SQL
+•	MySQL
+•	Window Functions
+•	Common Table Expressions (CTE)
+•	Aggregate Functions
+•	Ranking Functions
+
